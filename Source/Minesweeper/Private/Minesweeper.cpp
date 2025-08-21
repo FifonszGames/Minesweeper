@@ -7,6 +7,7 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
 #include "ToolMenus.h"
+#include "Slate/MinesweeperGameWidget.h"
 
 namespace MinesweeperUtils
 {
@@ -49,11 +50,10 @@ TSharedRef<SDockTab> FMinesweeperModule::SpawnMinesweeperTab(const FSpawnTabArgs
 		.TabRole(NomadTab)
 		[
 			SNew(SBox)
-			.HAlign(HAlign_Center)
-			.VAlign(VAlign_Center)
+			.HAlign(HAlign_Fill)
+			.VAlign(VAlign_Fill)
 			[
-				SNew(STextBlock)
-				.Text(FText::GetEmpty())
+				SNew(SMinesweeperGameWidget)
 			]
 		];
 }

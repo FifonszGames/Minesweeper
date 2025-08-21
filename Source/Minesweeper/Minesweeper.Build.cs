@@ -25,7 +25,9 @@ public class Minesweeper : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"Slate",
-				"SlateCore"
+				"SlateCore",
+				"PropertyEditor",
+				"DeveloperSettings"
 			});
 	}
 }
