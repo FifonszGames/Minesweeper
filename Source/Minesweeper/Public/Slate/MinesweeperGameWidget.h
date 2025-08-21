@@ -5,6 +5,9 @@
 #include "Widgets/SCompoundWidget.h"
 #include "Minesweeper/Public/MinesweeperSettings.h"
 
+class SUniformGridPanel;
+class SCheckBox;
+
 class SMinesweeperGameWidget : public SCompoundWidget
 {
 public:
@@ -20,6 +23,13 @@ public:
 
 private:
 	TSharedRef<SWidget> CreateSettingsView(const FMinesweeperGameSettings& InitialSettings);
+	void RecreateGrid(const FMinesweeperGameSettings& InSettings) const;
+	TSharedRef<SWidget> CreateGrid(const FMinesweeperGameSettings& InitialSettings);
+	
+	FReply OnRecreateClicked() const;
 
 	TSharedPtr<TStructOnScope<FMinesweeperGameSettings>> Settings;
+	
+	TSharedPtr<SCheckBox> SettingsCheckbox;
+	TSharedPtr<SUniformGridPanel> Grid;
 };
