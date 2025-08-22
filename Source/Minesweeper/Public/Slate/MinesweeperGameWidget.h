@@ -2,11 +2,13 @@
 
 #pragma once
 
+#include "Array2D.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Minesweeper/Public/MinesweeperSettings.h"
 
 class SUniformGridPanel;
 class SCheckBox;
+class MinesweeperCellData;
 
 class SMinesweeperGameWidget : public SCompoundWidget
 {
@@ -23,13 +25,17 @@ public:
 
 private:
 	TSharedRef<SWidget> CreateSettingsView(const FMinesweeperGameSettings& InitialSettings);
-	void RecreateGrid(const FMinesweeperGameSettings& InSettings) const;
 	TSharedRef<SWidget> CreateGrid(const FMinesweeperGameSettings& InitialSettings);
 	
-	FReply OnRecreateClicked() const;
+	void RecreateGrid(const FMinesweeperGameSettings& InSettings);
+
+	FReply OnRecreateClicked();
+	void UnrevelaedCellClicked(uint16 CellX, uint16 CellY);
 
 	TSharedPtr<TStructOnScope<FMinesweeperGameSettings>> Settings;
 	
 	TSharedPtr<SCheckBox> SettingsCheckbox;
 	TSharedPtr<SUniformGridPanel> Grid;
+
+	TArray2D<TSharedPtr<MinesweeperCellData>> Cells;
 };

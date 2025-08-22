@@ -4,6 +4,8 @@
 #include "Slate/MinesweeperGameWidget.h"
 #include "IStructureDetailsView.h"
 #include "PropertyEditorModule.h"
+#include "Slate/MinesweeperCell.h"
+#include "ViewModel/MinesweeperCellData.h"
 #include "Widgets/Layout/SUniformGridPanel.h"
 #include "Widgets/Input/SCheckBox.h"
 
@@ -85,26 +87,6 @@ TSharedRef<SWidget> SMinesweeperGameWidget::CreateSettingsView(const FMinesweepe
 	return ViewAsWidget.ToSharedRef();
 }
 
-void SMinesweeperGameWidget::RecreateGrid(const FMinesweeperGameSettings& InSettings) const
-{
-	if (!Grid.IsValid())
-	{
-		return;
-	}
-	for (int32 i = 0; i < InSettings.Width; ++i)
-	{
-		for (int32 j = 0; j < InSettings.Height; ++j)
-		{
-			Grid->AddSlot(i,j)
-			[
-				SNew(STextBlock)
-				.Text(FText::Format(INVTEXT("{0} {1}"), i, j))
-				.Justification(ETextJustify::Type::Center)
-			];
-		}	
-	}
-}
-
 TSharedRef<SWidget> SMinesweeperGameWidget::CreateGrid(const FMinesweeperGameSettings& InitialSettings)
 {
 	constexpr float MinSize = 20.f;
@@ -117,7 +99,32 @@ TSharedRef<SWidget> SMinesweeperGameWidget::CreateGrid(const FMinesweeperGameSet
 	return LocalGrid;
 }
 
-FReply SMinesweeperGameWidget::OnRecreateClicked() const
+void SMinesweeperGameWidget::RecreateGrid(const FMinesweeperGameSettings& InSettings)
+{
+	if (!Grid.IsValid())
+	{
+		return;
+	}
+	
+	Cells.Init(MakeShared<MinesweeperCellData>(), InSettings.Width, InSettings.Height);
+	Grid->ClearChildren();
+	for (uint16 i = 0; i < InSettings.Width; ++i)
+	{
+		for (uint16 j = 0; j < InSettings.Height; ++j)
+		{
+			Grid->AddSlot(i,j)
+			    .VAlign(VAlign_Fill)
+			    .HAlign(HAlign_Fill)
+			[
+				SNew(SMinesweeperCell)
+				.CellData(Cells.Get(i, j).ToSharedRef())
+				.OnUnrevelaedCellClicked(FSimpleDelegate::CreateSP(this, &SMinesweeperGameWidget::UnrevelaedCellClicked ,i, j))
+			];
+		}	
+	}
+}
+
+FReply SMinesweeperGameWidget::OnRecreateClicked()
 {
 	if (Settings.IsValid())
 	{
@@ -127,4 +134,11 @@ FReply SMinesweeperGameWidget::OnRecreateClicked() const
 		}
 	}
 	return FReply::Handled();
+}
+
+void SMinesweeperGameWidget::UnrevelaedCellClicked(uint16 CellX, uint16 CellY)
+{
+	TSharedPtr<MinesweeperCellData> CellData = Cells.Get(CellX, CellY);
+	check(CellData.IsValid())
+	CellData->bIsRevealed.Set(true);
 }
