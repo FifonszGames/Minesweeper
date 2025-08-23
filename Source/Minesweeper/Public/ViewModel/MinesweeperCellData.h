@@ -2,6 +2,9 @@
 
 #pragma once
 
+#include "Misc/Optional.h"
+#include "Delegates/Delegate.h"
+
 template <class T>
 class TVMField
 {

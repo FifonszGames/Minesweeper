@@ -16,31 +16,45 @@ void FMinesweeperGameInstance::Init()
 	Cells.Init(MakeShared<MinesweeperCellData>(), FUintPoint(Settings.Width, Settings.Height));
 }
 
-void FMinesweeperGameInstance::CellSelected(const FUintPoint& Coords)
+void FMinesweeperGameInstance::GameEnded(const EGameEndResult InResult) const
 {
-	if (!Cells.AreCoordinatesValid(Coords))
+	Cells.Foreach([&](const FUintPoint& Coords, const TSharedPtr<MinesweeperCellData>& Value)
+	{
+		if (Value->bIsBomb && !Value->bIsRevealed)
+		{
+			Value->bIsRevealed.Set(true);
+		}
+	});
+	OnFinished.ExecuteIfBound(InResult);
+}
+
+void FMinesweeperGameInstance::CellSelected(const FUintPoint& SelectedCoords)
+{
+	if (!Cells.AreCoordinatesValid(SelectedCoords))
 	{
 		return;
 	}
 	
-	TSharedPtr<MinesweeperCellData> CellData = Cells.Get(Coords);
+	TSharedPtr<MinesweeperCellData> CellData = Cells.Get(SelectedCoords);
 	check(CellData.IsValid())
 	if (!bHasPlacedMines)
 	{
-		PlaceMines(Coords);
+		PlaceMines(SelectedCoords);
 	}
 	
-	const ERevealCellResult Result = RevealCell(CellData.ToSharedRef(), Coords);
+	const ERevealCellResult Result = RevealCell(CellData.ToSharedRef(), SelectedCoords);
 	switch (Result)
 	{
 		case ERevealCellResult::IsBomb:
-			OnFinished.ExecuteIfBound(EGameEndResult::Failure);
-			break;
+			{
+				GameEnded(EGameEndResult::Failure);
+				break;
+			}
 		case ERevealCellResult::Valid:
 			{
 				if (ValidCellsLeft.IsEmpty())
 				{
-					OnFinished.ExecuteIfBound(EGameEndResult::Success);
+					GameEnded(EGameEndResult::Success);
 				}
 				break;
 			}

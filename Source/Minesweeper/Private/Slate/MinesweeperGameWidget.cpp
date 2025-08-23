@@ -34,6 +34,7 @@ void SMinesweeperGameWidget::Construct(const FArguments& InArgs)
 	
 	const TSharedRef<TStructOnScope<FMinesweeperGameSettings>> Settings = MakeShared<TStructOnScope<FMinesweeperGameSettings>>(InitialSettings);
 	MinesweeperGame = MakeShared<FMinesweeperGameInstance>(Settings);
+	MinesweeperGame->OnFinished.BindSP(this, &SMinesweeperGameWidget::OnGameFinished);
 
 	constexpr float MinSlotSize = 20.f;
 	TSharedRef<SUniformGridPanel> LocalGrid = SAssignNew(Grid, SUniformGridPanel)
@@ -131,4 +132,18 @@ void SMinesweeperGameWidget::RecreateGridSlots()
 			}))
 		];
 	});
+	Grid->SetEnabled(true);
+}
+
+void SMinesweeperGameWidget::OnGameFinished(const EGameEndResult Result)
+{
+	Grid->SetEnabled(false);
+	FTimerHandle Handle;
+	GEditor->GetTimerManager()->SetTimer(Handle, FTimerDelegate::CreateSPLambda(this, [Result, this]()
+	{
+		const EAppMsgCategory Category = Result == EGameEndResult::Success ? EAppMsgCategory::Success : EAppMsgCategory::Error;
+		const FText Message = Result == EGameEndResult::Success ? INVTEXT("Congratulations, you won!") : INVTEXT("Unfortunately, you lost");
+		FMessageDialog::Open(Category, EAppMsgType::Type::Ok, Message, INVTEXT("Game Finished"));
+		RecreateGridSlots();
+	}), 0.25f, false);
 }

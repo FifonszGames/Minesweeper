@@ -7,8 +7,9 @@
 
 class SUniformGridPanel;
 class SCheckBox;
-class MinesweeperCellData;
 class FMinesweeperGameInstance;
+
+enum class EGameEndResult : uint8;
 
 class SMinesweeperGameWidget : public SCompoundWidget
 {
@@ -24,6 +25,8 @@ public:
 
 private:
 	void RecreateGridSlots();
+
+	void OnGameFinished(const EGameEndResult Result);
 	
 	TSharedPtr<SCheckBox> SettingsCheckbox;
 	TSharedPtr<SUniformGridPanel> Grid;
