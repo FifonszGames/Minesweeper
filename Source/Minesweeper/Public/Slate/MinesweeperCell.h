@@ -23,10 +23,12 @@ public:
 
 private:
 	void InitFromCellData(MinesweeperCellData& InitialData);
-	
+
 	void OnIsRevealedChanged(bool bInIsRevealed);
 	void OnAdjacentBombsChanged(uint16 Bombs);
 	
+	void SetupContentAfterBeingRevealed();
+
 	TSharedPtr<SButton> MainButton;
 	
 	TSharedPtr<MinesweeperCellData> CellData;

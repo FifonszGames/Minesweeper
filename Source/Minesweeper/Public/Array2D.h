@@ -56,10 +56,10 @@ struct TArray2D
 	{
 		uint16 MaxNeighbors = 8;
 		
-		bool bLeft   = (Cell.X == 0);
-		bool bRight  = (Cell.X == Columns - 1);
-		bool bTop    = (Cell.Y == 0);
-		bool bBottom = (Cell.Y == Rows - 1);
+		const bool bLeft   = (Cell.X == 0);
+		const bool bRight  = (Cell.X == Columns - 1);
+		const bool bTop    = (Cell.Y == 0);
+		const bool bBottom = (Cell.Y == Rows - 1);
 
 		if ((bLeft && bTop) || (bLeft && bBottom) ||
 			(bRight && bTop) || (bRight && bBottom))

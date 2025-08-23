@@ -31,10 +31,29 @@ void SMinesweeperCell::InitFromCellData(MinesweeperCellData& InitialData)
 
 void SMinesweeperCell::OnIsRevealedChanged(bool bInIsRevealed)
 {
-	MainButton->SetEnabled(!bInIsRevealed);
-	if (!bInIsRevealed || ButtonContent.IsValid())
+	MainButton->SetBorderBackgroundColor(bInIsRevealed ? FSlateColor(FColor::Silver) : FSlateColor(EStyleColor::Foreground));
+	if (MainButton->IsEnabled() == !bInIsRevealed)
 	{
 		return;
+	}
+	
+	MainButton->SetEnabled(!bInIsRevealed);
+	
+	const bool bButtonHasContent = ButtonContent.IsValid();
+	if (bInIsRevealed)
+	{
+		if (!bButtonHasContent)
+		{
+			SetupContentAfterBeingRevealed();
+		}
+	}
+	else
+	{
+		if (bButtonHasContent)
+		{
+			ButtonContent.Reset();
+			MainButton->SetContent(SNullWidget::NullWidget);	
+		}
 	}
 }
 
@@ -43,5 +62,29 @@ void SMinesweeperCell::OnAdjacentBombsChanged(uint16 Bombs)
 	if (!CellData->bIsRevealed)
 	{
 		return;
+	}
+}
+
+void SMinesweeperCell::SetupContentAfterBeingRevealed()
+{
+	check(CellData.IsValid())
+	const MinesweeperCellData& Data = *CellData.Get();
+	TSharedPtr<SWidget> Content;
+	if (Data.bIsBomb)
+	{
+		Content = SNew(SImage)
+			.Image(FCoreStyle::Get().GetBrush("Icons.ErrorWithColor"));
+	}
+	else if (Data.AdjacentBombs > 0)
+	{
+		Content = SNew(STextBlock)
+			.Text(FText::Format(INVTEXT("{0}"), Data.AdjacentBombs.Get()))
+			.Justification(ETextJustify::Type::Center);
+	}
+	
+	if(Content.IsValid())
+	{
+		ButtonContent = Content;
+		MainButton->SetContent(Content.ToSharedRef());
 	}
 }
