@@ -114,19 +114,19 @@ void SMinesweeperGameWidget::RecreateGridSlots()
 	Grid->ClearChildren();
 	
 	MinesweeperGame->Init();
-	MinesweeperGame->GetCells().Foreach([this](const uint16 X, const uint16 Y, const TSharedPtr<MinesweeperCellData>& Value)
+	MinesweeperGame->GetCells().Foreach([this](const FUintPoint& Coords, const TSharedPtr<MinesweeperCellData>& Value)
 	{
-		Grid->AddSlot(X,Y)
+		Grid->AddSlot(Coords.X,Coords.Y)
 		.VAlign(VAlign_Fill)
 		.HAlign(HAlign_Fill)
 		[
 			SNew(SMinesweeperCell)
 			.CellData(Value.ToSharedRef())
-			.OnCellClicked(FSimpleDelegate::CreateSPLambda(this, [X, Y, this]
+			.OnCellClicked(FSimpleDelegate::CreateSPLambda(this, [Coords, this]
 			{
 				if (MinesweeperGame.IsValid())
 				{
-					MinesweeperGame->CellSelected(X, Y);
+					MinesweeperGame->CellSelected(Coords);
 				}
 			}))
 		];

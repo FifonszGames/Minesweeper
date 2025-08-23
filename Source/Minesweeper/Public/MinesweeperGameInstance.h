@@ -13,12 +13,12 @@ public:
 	explicit FMinesweeperGameInstance(const TSharedRef<TStructOnScope<FMinesweeperGameSettings>>& InSettings) : GameSettings(InSettings) {}
 
 	void Init();
-	void CellSelected(const uint16 CellX, const uint16 CellY);
+	void CellSelected(const FUintPoint& Coords);
 	
 	const TArray2D<TSharedPtr<MinesweeperCellData>>& GetCells() const { return Cells; }
 
 private:
-	void PlaceMines(const uint16 SafeX, const uint16 SafeY);
+	void PlaceMines(const FUintPoint& SafeCell);
 	
 	TSharedPtr<TStructOnScope<FMinesweeperGameSettings>> GameSettings;
 	TArray2D<TSharedPtr<MinesweeperCellData>> Cells;

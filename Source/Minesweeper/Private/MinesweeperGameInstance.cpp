@@ -12,17 +12,17 @@ void FMinesweeperGameInstance::Init()
 	bHasPlacedMines = false;
 	
 	const FMinesweeperGameSettings* Settings = GameSettings->Get();
-	Cells.Init(MakeShared<MinesweeperCellData>(), Settings->Width, Settings->Height);
+	Cells.Init(MakeShared<MinesweeperCellData>(), FUintPoint(Settings->Width, Settings->Height));
 }
 
-void FMinesweeperGameInstance::CellSelected(const uint16 CellX, const uint16 CellY)
+void FMinesweeperGameInstance::CellSelected(const FUintPoint& Coords)
 {
-	if (!Cells.AreCoordinatesValid(CellX, CellY))
+	if (!Cells.AreCoordinatesValid(Coords))
 	{
 		return;
 	}
 	
-	TSharedPtr<MinesweeperCellData> CellData = Cells.Get(CellX, CellY);
+	TSharedPtr<MinesweeperCellData> CellData = Cells.Get(Coords);
 	check(CellData.IsValid())
 	if (CellData->bIsRevealed)
 	{
@@ -30,13 +30,13 @@ void FMinesweeperGameInstance::CellSelected(const uint16 CellX, const uint16 Cel
 	}
 	if (!bHasPlacedMines)
 	{
-		PlaceMines(CellX, CellY);
+		PlaceMines(Coords);
 	}
 	CellData->bIsRevealed.Set(true);
 }
 
-void FMinesweeperGameInstance::PlaceMines(const uint16 SafeX, const uint16 SafeY)
+void FMinesweeperGameInstance::PlaceMines(const FUintPoint& SafeCell)
 {
-	//TODO::implement
+	//TODO:: get all valid candidates -> all cells - (safe cells + negighbours)
 	bHasPlacedMines = true;
 }

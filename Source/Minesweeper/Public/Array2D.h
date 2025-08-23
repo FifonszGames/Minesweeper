@@ -7,45 +7,46 @@
 template<typename T>
 struct TArray2D
 {
-	void Init(const T& Value, const int32 InColumns, const int32 InRows)
+	void Init(const T& Value, const FUintPoint& Size)
 	{
-		Columns = InColumns;
-		Rows = InRows;
+		Columns = Size.X;
+		Rows = Size.Y;
 		Data.Init(Value, Columns * Rows);
 	}
 
-	bool AreCoordinatesValid(const uint16 X, const uint16 Y) const
+	bool AreCoordinatesValid(const FUintPoint& Coords) const
 	{
-		return X < Columns && Y < Rows;
+		return Coords.X < Columns && Coords.Y < Rows;
 	}
 	
-	T& Get(const uint16 X, const uint16 Y)
+	T& Get(const FUintPoint& Coords)
 	{
-		check(AreCoordinatesValid(X, Y))
-		return Data[CoordinateToIndex(X, Y)];
+		check(AreCoordinatesValid(Coords))
+		return Data[CoordinateToIndex(Coords)];
 	}
 
-	const T& Get(const uint16 X, const uint16 Y) const
+	const T& Get(const FUintPoint& Coords) const
 	{
-		check(AreCoordinatesValid(X, Y))
-		return Data[CoordinateToIndex(X, Y)];
+		check(AreCoordinatesValid(Coords))
+		return Data[CoordinateToIndex(Coords)];
 	}
 
-	void Foreach(const TFunctionRef<void(const uint16 X, const uint16 Y, const T& Value)>& Func) const
+	void Foreach(const TFunctionRef<void(const FUintPoint& Coords, const T& Value)>& Func) const
 	{
 		for (uint16 y = 0; y < Rows; ++y)
 		{
 			for (uint16 x = 0; x < Columns; ++x)
 			{
-				Func(x, y, Data[CoordinateToIndex(x, y)]);
+				const FUintPoint Coords(x,y);
+				Func(Coords, Data[CoordinateToIndex(Coords)]);
 			}	
 		}
 	}
 
 private:
-	uint16 CoordinateToIndex(const uint16 X, const uint16 Y) const
+	uint16 CoordinateToIndex(const FUintPoint& Coords) const
 	{
-		return Y * Columns + X;
+		return Coords.Y * Columns + Coords.X;
 	}
 	
 	uint16 Columns = 0;
