@@ -15,7 +15,7 @@ public:
 		
 		SLATE_ARGUMENT(TSharedRef<MinesweeperCellData>, CellData)
 		
-		SLATE_EVENT(FSimpleDelegate, OnUnrevelaedCellClicked)
+		SLATE_EVENT(FSimpleDelegate, OnCellClicked)
 		
 	SLATE_END_ARGS()
 	
@@ -26,12 +26,10 @@ private:
 	
 	void OnIsRevealedChanged(bool bInIsRevealed);
 	void OnAdjacentBombsChanged(uint16 Bombs);
-
-	FReply OnButtonClicked() const;
 	
 	TSharedPtr<SButton> MainButton;
 	
 	TSharedPtr<MinesweeperCellData> CellData;
 	TSharedPtr<SWidget> ButtonContent;
-	FSimpleDelegate OnUnrevelaedCellClicked;
+	FSimpleDelegate OnCellClicked;
 };

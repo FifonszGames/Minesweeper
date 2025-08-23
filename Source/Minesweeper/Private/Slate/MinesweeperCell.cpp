@@ -6,14 +6,18 @@
 void SMinesweeperCell::Construct(const FArguments& InArgs)
 {
 	CellData = InArgs._CellData;
-	OnUnrevelaedCellClicked = InArgs._OnUnrevelaedCellClicked;
+	OnCellClicked = InArgs._OnCellClicked;
 	
 	ChildSlot
 	[
 		SAssignNew(MainButton, SButton)
 		.VAlign(VAlign_Fill)
 		.HAlign(HAlign_Fill)
-		.OnClicked(FOnClicked::CreateSP(this, &SMinesweeperCell::OnButtonClicked))
+		.OnClicked(FOnClicked::CreateSPLambda(this, [this]()
+		{
+			OnCellClicked.ExecuteIfBound();
+			return FReply::Handled(); 
+		}))
 	];
 
 	InitFromCellData(*CellData.Get());
@@ -41,14 +45,3 @@ void SMinesweeperCell::OnAdjacentBombsChanged(uint16 Bombs)
 		return;
 	}
 }
-
-FReply SMinesweeperCell::OnButtonClicked() const
-{
-	if (CellData.IsValid() && !CellData->bIsRevealed)
-	{
-		OnUnrevelaedCellClicked.ExecuteIfBound();
-		return FReply::Handled(); 	
-	}
-	return FReply::Unhandled(); 
-}
-

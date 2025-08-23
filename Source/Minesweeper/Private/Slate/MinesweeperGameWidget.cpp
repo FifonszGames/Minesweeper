@@ -3,15 +3,45 @@
 
 #include "Slate/MinesweeperGameWidget.h"
 #include "IStructureDetailsView.h"
+#include "MinesweeperGameInstance.h"
 #include "PropertyEditorModule.h"
 #include "Slate/MinesweeperCell.h"
 #include "ViewModel/MinesweeperCellData.h"
 #include "Widgets/Layout/SUniformGridPanel.h"
 #include "Widgets/Input/SCheckBox.h"
 
+namespace MinesweeperWidgetUtils
+{
+	TSharedRef<SWidget> CreateSettingsView(const TSharedRef<TStructOnScope<FMinesweeperGameSettings>>& InitialSettings)
+	{
+		FDetailsViewArgs ViewArgs;
+		{
+			ViewArgs.bAllowSearch = false;
+			ViewArgs.bShowScrollBar = true;
+		}
+		FPropertyEditorModule& PropertyEditor = FModuleManager::Get().LoadModuleChecked<FPropertyEditorModule>(TEXT("PropertyEditor"));
+	
+		TSharedRef<IStructureDetailsView> StructureView = PropertyEditor.CreateStructureDetailView(ViewArgs, {}, InitialSettings, INVTEXT("Game Settings"));
+		TSharedPtr<SWidget> ViewAsWidget = StructureView->GetWidget();
+		check(ViewAsWidget.IsValid())
+		return ViewAsWidget.ToSharedRef();
+	}
+}
+
 void SMinesweeperGameWidget::Construct(const FArguments& InArgs)
 {
-	const FMinesweeperGameSettings InitialSettings = InArgs._InitialSettings.IsSet() ? InArgs._InitialSettings.GetValue() : UMinesweeperSettings::GetDefaultSettings();
+	const FMinesweeperGameSettings& InitialSettings = InArgs._InitialSettings.IsSet() ? InArgs._InitialSettings.GetValue() : UMinesweeperSettings::GetDefaultSettings();
+	
+	const TSharedRef<TStructOnScope<FMinesweeperGameSettings>> Settings = MakeShared<TStructOnScope<FMinesweeperGameSettings>>(InitialSettings);
+	MinesweeperGame = MakeShared<FMinesweeperGameInstance>(Settings);
+
+	constexpr float MinSlotSize = 20.f;
+	TSharedRef<SUniformGridPanel> LocalGrid = SAssignNew(Grid, SUniformGridPanel)
+	.SlotPadding(FMargin(2.0f))
+	.MinDesiredSlotHeight(MinSlotSize)
+	.MinDesiredSlotWidth(MinSlotSize);
+
+	RecreateGridSlots();
 	
 	ChildSlot
 	[
@@ -21,7 +51,7 @@ void SMinesweeperGameWidget::Construct(const FArguments& InArgs)
 		.AutoHeight()
 		.MaxHeight(150.f)
 		[
-			CreateSettingsView(InitialSettings)
+			MinesweeperWidgetUtils::CreateSettingsView(Settings)
 		]
 		+SVerticalBox::Slot()
 		.AutoHeight()
@@ -56,8 +86,12 @@ void SMinesweeperGameWidget::Construct(const FArguments& InArgs)
 				.AutoHeight()
 				[
 					SNew(SButton)
-					.OnClicked(FOnClicked::CreateSP(this, &SMinesweeperGameWidget::OnRecreateClicked))
 					.Text(INVTEXT("Recreate Grid"))
+					.OnClicked(FOnClicked::CreateSPLambda(this, [this]()
+					{
+						RecreateGridSlots();
+						return FReply::Handled();
+					}))
 				]
 			]
 		]
@@ -66,79 +100,35 @@ void SMinesweeperGameWidget::Construct(const FArguments& InArgs)
 		.VAlign(VAlign_Fill)
 		.Padding(FMargin(16.f))
 		[
-			CreateGrid(InitialSettings)
+			LocalGrid
 		]
 	];
 }
 
-TSharedRef<SWidget> SMinesweeperGameWidget::CreateSettingsView(const FMinesweeperGameSettings& InitialSettings)
+void SMinesweeperGameWidget::RecreateGridSlots()
 {
-	FDetailsViewArgs ViewArgs;
-	{
-		ViewArgs.bAllowSearch = false;
-		ViewArgs.bShowScrollBar = true;
-	}
-	FPropertyEditorModule& PropertyEditor = FModuleManager::Get().LoadModuleChecked<FPropertyEditorModule>(TEXT("PropertyEditor"));
-
-	Settings = MakeShared<TStructOnScope<FMinesweeperGameSettings>>(InitialSettings);
-	TSharedRef<IStructureDetailsView> StructureView = PropertyEditor.CreateStructureDetailView(ViewArgs, {}, Settings, INVTEXT("Game Settings"));
-	TSharedPtr<SWidget> ViewAsWidget = StructureView->GetWidget();
-	check(ViewAsWidget.IsValid())
-	return ViewAsWidget.ToSharedRef();
-}
-
-TSharedRef<SWidget> SMinesweeperGameWidget::CreateGrid(const FMinesweeperGameSettings& InitialSettings)
-{
-	constexpr float MinSize = 20.f;
-	TSharedRef<SUniformGridPanel> LocalGrid = SAssignNew(Grid, SUniformGridPanel)
-	.SlotPadding(FMargin(2.0f))
-	.MinDesiredSlotHeight(MinSize)
-	.MinDesiredSlotWidth(MinSize);
-
-	RecreateGrid(InitialSettings);
-	return LocalGrid;
-}
-
-void SMinesweeperGameWidget::RecreateGrid(const FMinesweeperGameSettings& InSettings)
-{
-	if (!Grid.IsValid())
+	if (!Grid.IsValid() || !MinesweeperGame.IsValid())
 	{
 		return;
 	}
-	
-	Cells.Init(MakeShared<MinesweeperCellData>(), InSettings.Width, InSettings.Height);
 	Grid->ClearChildren();
-	for (uint16 i = 0; i < InSettings.Width; ++i)
+	
+	MinesweeperGame->Init();
+	MinesweeperGame->GetCells().Foreach([this](const uint16 X, const uint16 Y, const TSharedPtr<MinesweeperCellData>& Value)
 	{
-		for (uint16 j = 0; j < InSettings.Height; ++j)
-		{
-			Grid->AddSlot(i,j)
-			    .VAlign(VAlign_Fill)
-			    .HAlign(HAlign_Fill)
-			[
-				SNew(SMinesweeperCell)
-				.CellData(Cells.Get(i, j).ToSharedRef())
-				.OnUnrevelaedCellClicked(FSimpleDelegate::CreateSP(this, &SMinesweeperGameWidget::UnrevelaedCellClicked ,i, j))
-			];
-		}	
-	}
-}
-
-FReply SMinesweeperGameWidget::OnRecreateClicked()
-{
-	if (Settings.IsValid())
-	{
-		if (const FMinesweeperGameSettings* CurrentSettings = Settings->Get())
-		{
-			RecreateGrid(*CurrentSettings);
-		}
-	}
-	return FReply::Handled();
-}
-
-void SMinesweeperGameWidget::UnrevelaedCellClicked(uint16 CellX, uint16 CellY)
-{
-	TSharedPtr<MinesweeperCellData> CellData = Cells.Get(CellX, CellY);
-	check(CellData.IsValid())
-	CellData->bIsRevealed.Set(true);
+		Grid->AddSlot(X,Y)
+		.VAlign(VAlign_Fill)
+		.HAlign(HAlign_Fill)
+		[
+			SNew(SMinesweeperCell)
+			.CellData(Value.ToSharedRef())
+			.OnCellClicked(FSimpleDelegate::CreateSPLambda(this, [X, Y, this]
+			{
+				if (MinesweeperGame.IsValid())
+				{
+					MinesweeperGame->CellSelected(X, Y);
+				}
+			}))
+		];
+	});
 }
