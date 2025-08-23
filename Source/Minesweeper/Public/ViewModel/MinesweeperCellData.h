@@ -22,11 +22,11 @@ private:
 	T Value;
 };
 
-#define BIND_VM_WITH_CALLBACK(field, callback) \
-callback(field.Get()); \
-field.OnChanged.BindSP(this, &callback);
+#define BIND_VM_WITH_CALLBACK(Field, Callback) \
+Callback(Field.Get()); \
+Field.OnChanged.BindSP(this, &Callback);
 
-class MinesweeperCellData : public TSharedFromThis<MinesweeperCellData>
+class MinesweeperCellData
 {
 public:
 	TVMField<bool> bIsRevealed = false; 
