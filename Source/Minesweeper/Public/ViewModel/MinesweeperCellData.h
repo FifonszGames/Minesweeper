@@ -6,14 +6,16 @@ template <class T>
 class TVMField
 {
 public:
+	TVMField() = default;
 	TVMField(const T Value) : Value(Value) {}
 
 	T Get() const { return Value; }
+	const T& GetRef() const { return Value; }
 	
 	void Set(const T NewValue)
 	{
 		Value = NewValue;
-		OnChanged.ExecuteIfBound(NewValue);
+		OnChanged.ExecuteIfBound(Value);
 	}
 	
 	operator T() const { return Get(); }
@@ -32,5 +34,5 @@ class MinesweeperCellData
 public:
 	TVMField<bool> bIsRevealed = false; 
 	TVMField<bool> bIsBomb = false;
-	TVMField<uint16> AdjacentBombs = 0; 
+	TVMField<TOptional<uint16>> AdjacentBombs; 
 };

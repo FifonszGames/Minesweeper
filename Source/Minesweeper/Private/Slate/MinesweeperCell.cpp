@@ -38,6 +38,7 @@ void SMinesweeperCell::InitFromCellData(MinesweeperCellData& InitialData)
 void SMinesweeperCell::OnIsRevealedChanged(bool bInIsRevealed)
 {
 	MainButton->SetBorderBackgroundColor(bInIsRevealed ? FSlateColor(FColor::Silver) : FSlateColor(EStyleColor::Foreground));
+	
 	if (MainButton->IsEnabled() == !bInIsRevealed)
 	{
 		return;
@@ -55,36 +56,61 @@ void SMinesweeperCell::OnIsRevealedChanged(bool bInIsRevealed)
 	}
 }
 
-void SMinesweeperCell::OnIsBombChanged(bool bInIsBomb) const
+void SMinesweeperCell::OnIsBombChanged(bool bInIsBomb)
 {
-	if (!BombImage.IsValid())
+	const MinesweeperCellData& Cell = *CellData.Get();
+	if (!Cell.bIsRevealed)
 	{
 		return;
 	}
 	if (bInIsBomb)
 	{
-		BombImage.Pin()->SetImage(CellUtils::GetBombBrush());
+		SetContentAsBomb();
 	}
-	else if (CellData.Get()->AdjacentBombs.Get() == 0)
+	else if (!BombImage.IsValid())
 	{
 		MainButton->SetContent(SNullWidget::NullWidget);
 	}
 }
 
-void SMinesweeperCell::OnAdjacentBombsChanged(uint16 Bombs) const
+void SMinesweeperCell::OnAdjacentBombsChanged(TOptional<uint16> Bombs)
 {
-	if (!AdjacentBombsText.IsValid())
+	const MinesweeperCellData& Cell = *CellData.Get();
+	if (!Cell.bIsRevealed)
 	{
 		return;
 	}
-	if (Bombs > 0)
+	if (Bombs.IsSet() && Bombs.GetValue() > 0)
 	{
-		AdjacentBombsText.Pin()->SetText(FText::AsNumber(Bombs));	
+		SetContentAsNumber(Bombs.GetValue());	
 	}
-	else if (!CellData.Get()->bIsBomb)
+	else if (!AdjacentBombsText.IsValid())
 	{
 		MainButton->SetContent(SNullWidget::NullWidget);
 	}
+}
+
+void SMinesweeperCell::SetContentAsBomb()
+{
+	if (BombImage.IsValid())
+	{
+		return;
+	}
+	MainButton->SetContent(SAssignNew(BombImage, SImage)
+	.Image(CellUtils::GetBombBrush()));
+}
+
+void SMinesweeperCell::SetContentAsNumber(const uint16 InNumber)
+{
+	const FText NewText = FText::AsNumber(InNumber);
+	if (AdjacentBombsText.IsValid())
+	{
+		AdjacentBombsText.Pin()->SetText(NewText);
+		return;
+	}
+	MainButton->SetContent(SAssignNew(AdjacentBombsText, STextBlock)
+	.Text(NewText)
+	.Justification(ETextJustify::Type::Center));
 }
 
 void SMinesweeperCell::SetupContentAfterBeingRevealed()
@@ -93,14 +119,11 @@ void SMinesweeperCell::SetupContentAfterBeingRevealed()
 	const MinesweeperCellData& Data = *CellData.Get();
 	if (Data.bIsBomb)
 	{
-		MainButton->SetContent(SAssignNew(BombImage, SImage)
-			.Image(CellUtils::GetBombBrush()));
+		SetContentAsBomb();
 	}
-	else if (Data.AdjacentBombs > 0)
+	else if (Data.AdjacentBombs.GetRef().IsSet() && Data.AdjacentBombs.GetRef().GetValue() > 0)
 	{
-		MainButton->SetContent(SAssignNew(AdjacentBombsText, STextBlock)
-			.Text(FText::AsNumber(Data.AdjacentBombs.Get()))
-			.Justification(ETextJustify::Type::Center));
+		SetContentAsNumber(Data.AdjacentBombs.GetRef().GetValue());
 	}
 	else
 	{

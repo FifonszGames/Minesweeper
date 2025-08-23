@@ -24,10 +24,12 @@ public:
 private:
 	void InitFromCellData(MinesweeperCellData& InitialData);
 
-	void OnIsBombChanged(bool bInIsBomb) const;
+	void OnIsBombChanged(bool bInIsBomb);
 	void OnIsRevealedChanged(bool bInIsRevealed);
-	void OnAdjacentBombsChanged(uint16 Bombs) const;
-	
+	void OnAdjacentBombsChanged(TOptional<uint16> Bombs);
+	void SetContentAsBomb();
+	void SetContentAsNumber(const uint16 InNumber);
+
 	void SetupContentAfterBeingRevealed();
 
 	TSharedPtr<SButton> MainButton;

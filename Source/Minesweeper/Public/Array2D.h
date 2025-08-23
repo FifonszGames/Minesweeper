@@ -50,6 +50,25 @@ struct TArray2D
 		}
 	}
 
+	void ForeachNeighbour(const FUintPoint& Cell, const TFunctionRef<void(const FUintPoint& NeighbourCoords)>& Func) const
+	{
+		for (int16 dy = -1; dy <= 1; ++dy)
+		{
+			for (int16 dx = -1; dx <= 1; ++dx)
+			{
+				if (dx == 0 && dy == 0) continue;
+
+				const int16 NeighbourX = static_cast<int16>(Cell.X) + dx;
+				const int16 NeighbourY = static_cast<int16>(Cell.Y) + dy;
+
+				if (NeighbourX >= 0 && NeighbourY >= 0 && NeighbourX < Columns && NeighbourY < Rows)
+				{
+					Func(FUintPoint(NeighbourX, NeighbourY));
+				}
+			}
+		}
+	}
+
 	uint16 Num() const { return Data.Num(); }
 
 	uint16 GetNumNeighbors(const FUintPoint& Cell) const
