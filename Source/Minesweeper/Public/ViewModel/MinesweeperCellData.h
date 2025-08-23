@@ -15,6 +15,7 @@ public:
 		Value = NewValue;
 		OnChanged.ExecuteIfBound(NewValue);
 	}
+	
 	operator T() const { return Get(); }
 	
 	TDelegate<void(const T)> OnChanged;
