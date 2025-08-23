@@ -4,6 +4,7 @@
 #include "MinesweeperGameInstance.h"
 
 #include "MinesweeperSettings.h"
+#include "Algo/RandomShuffle.h"
 #include "ViewModel/MinesweeperCellData.h"
 
 
@@ -37,6 +38,23 @@ void FMinesweeperGameInstance::CellSelected(const FUintPoint& Coords)
 
 void FMinesweeperGameInstance::PlaceMines(const FUintPoint& SafeCell)
 {
-	//TODO:: get all valid candidates -> all cells - (safe cells + negighbours)
+	TArray<FUintPoint> Candidates;
+	Candidates.Reserve(Cells.Num() - Cells.GetNumNeighbors(SafeCell) - 1);
+	
+	Cells.Foreach([&](const FUintPoint& Coords, const TSharedPtr<MinesweeperCellData>& Value)
+	{
+		if (Coords == SafeCell || Array2DUtils::AreNeighbours(FIntPoint(SafeCell), FIntPoint(Coords)))
+		{
+			return;
+		}
+		Candidates.Add(Coords);
+	});
+	
+	Algo::RandomShuffle(Candidates);
+	const FMinesweeperGameSettings* Settings = GameSettings->Get();
+	for (int32 i = 0; i < Settings->NumberOfMines; ++i)
+	{
+		Cells.Get(Candidates[i])->bIsBomb.Set(true);
+	}
 	bHasPlacedMines = true;
 }

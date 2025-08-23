@@ -15,12 +15,12 @@ public:
 	void Init();
 	void CellSelected(const FUintPoint& Coords);
 	
-	const TArray2D<TSharedPtr<MinesweeperCellData>>& GetCells() const { return Cells; }
+	const TSharedArray2D<MinesweeperCellData>& GetCells() const { return Cells; }
 
 private:
 	void PlaceMines(const FUintPoint& SafeCell);
 	
 	TSharedPtr<TStructOnScope<FMinesweeperGameSettings>> GameSettings;
-	TArray2D<TSharedPtr<MinesweeperCellData>> Cells;
+	TSharedArray2D<MinesweeperCellData> Cells;
 	bool bHasPlacedMines = false;
 };
