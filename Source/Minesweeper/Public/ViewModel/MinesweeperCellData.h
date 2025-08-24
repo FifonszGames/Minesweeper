@@ -17,6 +17,10 @@ public:
 	
 	void Set(const T NewValue)
 	{
+		if (NewValue == Value)
+		{
+			return;
+		}
 		Value = NewValue;
 		OnChanged.ExecuteIfBound(Value);
 	}
