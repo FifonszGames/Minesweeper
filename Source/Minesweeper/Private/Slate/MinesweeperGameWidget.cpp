@@ -1,15 +1,20 @@
 ﻿// Copyright FifonszGames 2025 All Rights Reserved.
 
-
 #include "Slate/MinesweeperGameWidget.h"
+
+#include "Editor.h"
 #include "IStructureDetailsView.h"
 #include "Minesweeper.h"
 #include "MinesweeperGameInstance.h"
 #include "PropertyEditorModule.h"
+#include "Misc/MessageDialog.h"
 #include "Slate/MinesweeperCell.h"
 #include "ViewModel/MinesweeperCellData.h"
+#include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SUniformGridPanel.h"
 #include "Widgets/Input/SCheckBox.h"
+#include "Widgets/Layout/SBox.h"
+#include "Widgets/Text/STextBlock.h"
 
 void SMinesweeperGameWidget::Construct(const FArguments& InArgs)
 {

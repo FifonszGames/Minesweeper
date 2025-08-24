@@ -1,6 +1,5 @@
 ﻿// Copyright FifonszGames 2025 All Rights Reserved.
 
-
 #include "Customization/MinesweeperGameSettingsCustomization.h"
 
 #include "DetailLayoutBuilder.h"

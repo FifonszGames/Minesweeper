@@ -3,10 +3,12 @@
 #pragma once
 
 #include "Widgets/SCompoundWidget.h"
+#include "UObject/StructOnScope.h"
 #include "Minesweeper/Public/MinesweeperSettings.h"
 
 class SUniformGridPanel;
 class SCheckBox;
+class SBox;
 class FMinesweeperGameInstance;
 
 enum class EGameEndResult : uint8;

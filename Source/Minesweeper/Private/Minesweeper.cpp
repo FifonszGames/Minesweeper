@@ -3,9 +3,9 @@
 #include "Minesweeper.h"
 #include "Slate/MinesweeperStyle.h"
 #include "MinesweeperCommands.h"
+#include "PropertyEditorModule.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Layout/SBox.h"
-#include "Widgets/Text/STextBlock.h"
 #include "ToolMenus.h"
 #include "Customization/MinesweeperGameSettingsCustomization.h"
 #include "Slate/MinesweeperGameWidget.h"
@@ -24,8 +24,7 @@ void FMinesweeperModule::StartupModule()
 	PluginCommands = MakeShared<FUICommandList>();
 	PluginCommands->MapAction(
 		FMinesweeperCommands::Get().OpenMinesweeperWindow,
-		FExecuteAction::CreateStatic(&FMinesweeperModule::MinesweeperButtonClicked),
-		FCanExecuteAction());
+		FExecuteAction::CreateStatic(&FMinesweeperModule::MinesweeperButtonClicked));
 
 	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FMinesweeperModule::RegisterMenus));
 	
@@ -36,7 +35,6 @@ void FMinesweeperModule::StartupModule()
 	FPropertyEditorModule& PropertyEditor = FModuleManager::Get().LoadModuleChecked<FPropertyEditorModule>(MinesweeperUtils::PropertyEditorModuleName);
 	PropertyEditor.RegisterCustomPropertyTypeLayout(FMinesweeperGameSettings::StaticStruct()->GetFName(),
 		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FMinesweeperGameSettingsPropertyCustomization::MakeInstance));
-	
 	PropertyEditor.RegisterCustomClassLayout(FMinesweeperGameSettings::StaticStruct()->GetFName(),
 		FOnGetDetailCustomizationInstance::CreateStatic(&FMinesweeperGameSettingsClassCustomization::MakeInstance));
 }

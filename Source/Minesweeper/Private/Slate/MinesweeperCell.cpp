@@ -2,6 +2,12 @@
 
 #include "Slate/MinesweeperCell.h"
 
+#include "Widgets/Images/SImage.h"
+#include "Widgets/Input/SButton.h"
+#include "Widgets/Layout/SBorder.h"
+#include "Widgets/Layout/SBox.h"
+#include "Widgets/Text/STextBlock.h"
+
 void SMinesweeperCell::Construct(const FArguments& InArgs)
 {
 	CellData = InArgs._CellData;

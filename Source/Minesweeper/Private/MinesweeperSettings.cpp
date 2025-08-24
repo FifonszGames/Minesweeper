@@ -1,5 +1,4 @@
-﻿// ﻿// Copyright FifonszGames 2025 All Rights Reserved.
-
+﻿// Copyright FifonszGames 2025 All Rights Reserved.
 
 #include "MinesweeperSettings.h"
 

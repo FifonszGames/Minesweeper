@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Array2D.h"
+#include "UObject/StructOnScope.h"
 
 struct FMinesweeperGameSettings;
 class MinesweeperCellData;
