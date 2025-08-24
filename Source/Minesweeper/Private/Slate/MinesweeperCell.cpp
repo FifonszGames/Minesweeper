@@ -1,12 +1,6 @@
 ﻿// Copyright FifonszGames 2025 All Rights Reserved.
 
-
 #include "Slate/MinesweeperCell.h"
-
-namespace CellUtils
-{
-	const FSlateBrush* GetBombBrush() { return FCoreStyle::Get().GetBrush("Icons.ErrorWithColor"); }
-}
 
 void SMinesweeperCell::Construct(const FArguments& InArgs)
 {
@@ -15,13 +9,11 @@ void SMinesweeperCell::Construct(const FArguments& InArgs)
 	
 	ChildSlot
 	[
-		SAssignNew(MainButton, SButton)
-		.OnClicked(FOnClicked::CreateSPLambda(this, [this]()
-		{
-			OnCellClicked.ExecuteIfBound();
-			return FReply::Handled(); 
-		}))
+		SAssignNew(MainBorder, SBorder)
+		.BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
+		.ShowEffectWhenDisabled(false)
 	];
+	
 	InitFromCellData(*CellData.Get());
 }
 
@@ -34,14 +26,7 @@ void SMinesweeperCell::InitFromCellData(MinesweeperCellData& InitialData)
 
 void SMinesweeperCell::OnIsRevealedChanged(bool bInIsRevealed)
 {
-	MainButton->SetBorderBackgroundColor(bInIsRevealed ? FSlateColor(FColor::Silver) : FSlateColor(EStyleColor::Foreground));
-	
-	if (MainButton->IsEnabled() == !bInIsRevealed)
-	{
-		return;
-	}
-	
-	MainButton->SetEnabled(!bInIsRevealed);
+	MainBorder->SetEnabled(!bInIsRevealed);
 	
 	if (bInIsRevealed)
 	{
@@ -49,7 +34,13 @@ void SMinesweeperCell::OnIsRevealedChanged(bool bInIsRevealed)
 	}
 	else
 	{
-		MainButton->SetContent(SNullWidget::NullWidget);	
+		MainBorder->SetContent(
+			SNew(SButton)
+			.OnClicked(FOnClicked::CreateSPLambda(this, [this]()
+			{
+				OnCellClicked.ExecuteIfBound();
+				return FReply::Handled(); 
+			})));	
 	}
 }
 
@@ -66,7 +57,7 @@ void SMinesweeperCell::OnIsBombChanged(bool bInIsBomb)
 	}
 	else if (!BombImage.IsValid())
 	{
-		MainButton->SetContent(SNullWidget::NullWidget);
+		MainBorder->SetContent(SNullWidget::NullWidget);
 	}
 }
 
@@ -83,7 +74,7 @@ void SMinesweeperCell::OnAdjacentBombsChanged(TOptional<uint16> Bombs)
 	}
 	else if (!AdjacentBombsText.IsValid())
 	{
-		MainButton->SetContent(SNullWidget::NullWidget);
+		MainBorder->SetContent(SNullWidget::NullWidget);
 	}
 }
 
@@ -93,8 +84,9 @@ void SMinesweeperCell::SetContentAsBomb()
 	{
 		return;
 	}
-	MainButton->SetContent(SAssignNew(BombImage, SImage)
-	.Image(CellUtils::GetBombBrush()));
+	MainBorder->SetContent(
+		SAssignNew(BombImage, SImage)
+		.Image(FCoreStyle::Get().GetBrush("Icons.ErrorWithColor")));
 }
 
 void SMinesweeperCell::SetContentAsNumber(const uint16 InNumber)
@@ -105,9 +97,16 @@ void SMinesweeperCell::SetContentAsNumber(const uint16 InNumber)
 		AdjacentBombsText.Pin()->SetText(NewText);
 		return;
 	}
-	MainButton->SetContent(SAssignNew(AdjacentBombsText, STextBlock)
-	.Text(NewText)
-	.Justification(ETextJustify::Type::Center));
+	MainBorder->SetContent(
+		SNew(SBox)
+		.VAlign(VAlign_Center)
+		.HAlign(HAlign_Center)
+		[
+			SAssignNew(AdjacentBombsText, STextBlock)
+			.Text(NewText)
+			.Font(FAppStyle::Get().GetFontStyle("Font.Large.Bold"))
+			.Justification(ETextJustify::Type::Center)
+		]);
 }
 
 void SMinesweeperCell::SetupContentAfterBeingRevealed()
@@ -124,6 +123,6 @@ void SMinesweeperCell::SetupContentAfterBeingRevealed()
 	}
 	else
 	{
-		MainButton->SetContent(SNullWidget::NullWidget);
+		MainBorder->SetContent(SNullWidget::NullWidget);
 	}
 }

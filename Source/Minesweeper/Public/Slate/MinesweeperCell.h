@@ -6,6 +6,9 @@
 #include "ViewModel/MinesweeperCellData.h"
 #include "Widgets/SCompoundWidget.h"
 
+class SBorder;
+class SImage;
+class STextBlock;
 
 class SMinesweeperCell : public SCompoundWidget
 {
@@ -31,8 +34,8 @@ private:
 	void SetContentAsNumber(const uint16 InNumber);
 
 	void SetupContentAfterBeingRevealed();
-
-	TSharedPtr<SButton> MainButton;
+	
+	TSharedPtr<SBorder> MainBorder;
 	TWeakPtr<SImage> BombImage;
 	TWeakPtr<STextBlock> AdjacentBombsText;
 
