@@ -11,13 +11,12 @@ struct FMinesweeperGameSettings
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere, meta=(ClampMin=2, ClampMax=50))
-	int32 Width = 4;
-	UPROPERTY(EditAnywhere, meta=(ClampMin=2, ClampMax=50))
-	int32 Height = 4;
-	//TODO:: adjust so that its always lower than width * height
-	UPROPERTY(EditAnywhere, meta=(ClampMin=1, ClampMax=100))
-	int32 NumberOfMines = 4;
+	UPROPERTY(EditAnywhere, meta=(ClampMin=4, ClampMax=25))
+	uint16 Width = 6;
+	UPROPERTY(EditAnywhere, meta=(ClampMin=4, ClampMax=25))
+	uint16 Height = 6;
+	UPROPERTY(EditAnywhere, meta=(ClampMin=1))
+	uint16 NumberOfMines = 6;
 };
 
 UCLASS(Config=Editor, DefaultConfig)

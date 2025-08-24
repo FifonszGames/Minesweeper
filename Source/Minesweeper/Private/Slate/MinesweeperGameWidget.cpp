@@ -20,7 +20,7 @@ namespace MinesweeperWidgetUtils
 			ViewArgs.bAllowSearch = false;
 			ViewArgs.bShowScrollBar = true;
 		}
-		FPropertyEditorModule& PropertyEditor = FModuleManager::Get().LoadModuleChecked<FPropertyEditorModule>(TEXT("PropertyEditor"));
+		FPropertyEditorModule& PropertyEditor = FModuleManager::Get().LoadModuleChecked<FPropertyEditorModule>(MinesweeperUtils::PropertyEditorModuleName);
 	
 		TSharedRef<IStructureDetailsView> StructureView = PropertyEditor.CreateStructureDetailView(ViewArgs, {}, InitialSettings, INVTEXT("Game Settings"));
 		TSharedPtr<SWidget> ViewAsWidget = StructureView->GetWidget();

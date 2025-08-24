@@ -7,11 +7,13 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
 #include "ToolMenus.h"
+#include "Customization/MinesweeperGameSettingsCustomization.h"
 #include "Slate/MinesweeperGameWidget.h"
 
 namespace MinesweeperUtils
 {
-	const FName PluginName(TEXT("Minesweeper"));	
+	const FName PluginName(TEXT("Minesweeper"));
+	const FName PropertyEditorModuleName(TEXT("PropertyEditor"));
 }
 
 void FMinesweeperModule::StartupModule()
@@ -30,18 +32,30 @@ void FMinesweeperModule::StartupModule()
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(MinesweeperUtils::PluginName, FOnSpawnTab::CreateStatic(&FMinesweeperModule::SpawnMinesweeperTab))
 		.SetDisplayName(FText::FromName(MinesweeperUtils::PluginName))
 		.SetMenuType(ETabSpawnerMenuType::Hidden);
+
+	FPropertyEditorModule& PropertyEditor = FModuleManager::Get().LoadModuleChecked<FPropertyEditorModule>(MinesweeperUtils::PropertyEditorModuleName);
+	PropertyEditor.RegisterCustomPropertyTypeLayout(FMinesweeperGameSettings::StaticStruct()->GetFName(),
+		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FMinesweeperGameSettingsPropertyCustomization::MakeInstance));
+	
+	PropertyEditor.RegisterCustomClassLayout(FMinesweeperGameSettings::StaticStruct()->GetFName(),
+		FOnGetDetailCustomizationInstance::CreateStatic(&FMinesweeperGameSettingsClassCustomization::MakeInstance));
 }
 
 void FMinesweeperModule::ShutdownModule()
 {
+	if (FPropertyEditorModule* PropertyEditor = FModuleManager::Get().LoadModulePtr<FPropertyEditorModule>(MinesweeperUtils::PropertyEditorModuleName))
+	{
+		PropertyEditor->UnregisterCustomPropertyTypeLayout(FMinesweeperGameSettings::StaticStruct()->GetFName());
+		PropertyEditor->UnregisterCustomClassLayout(FMinesweeperGameSettings::StaticStruct()->GetFName());
+	}
+		
+	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(MinesweeperUtils::PluginName);
+	
 	UToolMenus::UnRegisterStartupCallback(this);
 	UToolMenus::UnregisterOwner(this);
-
-	FMinesweeperStyle::Shutdown();
-
-	FMinesweeperCommands::Unregister();
 	
-	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(MinesweeperUtils::PluginName);
+	FMinesweeperCommands::Unregister();
+	FMinesweeperStyle::Shutdown();
 }
 
 TSharedRef<SDockTab> FMinesweeperModule::SpawnMinesweeperTab(const FSpawnTabArgs& SpawnTabArgs)

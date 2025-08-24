@@ -10,7 +10,8 @@ class FSpawnTabArgs;
 
 namespace MinesweeperUtils
 {
-	extern const FName PluginName;	
+	extern const FName PluginName;
+	extern const FName PropertyEditorModuleName;	
 }
 
 class FMinesweeperModule : public IModuleInterface

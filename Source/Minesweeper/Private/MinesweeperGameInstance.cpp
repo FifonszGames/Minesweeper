@@ -86,7 +86,7 @@ void FMinesweeperGameInstance::PlaceMines(const FUintPoint& SafeCell)
 	if (!Candidates.IsEmpty())
 	{
 		Algo::RandomShuffle(Candidates);
-		const int32 NumOfMines = FMath::Min(GameSettings->Get()->NumberOfMines, Candidates.Num());
+		const uint16 NumOfMines = FMath::Min(GameSettings->Get()->NumberOfMines, static_cast<uint16>(Candidates.Num()));
 		for (int32 i = 0; i < NumOfMines; ++i)
 		{
 			Cells.Get(Candidates[i])->bIsBomb.Set(true);
