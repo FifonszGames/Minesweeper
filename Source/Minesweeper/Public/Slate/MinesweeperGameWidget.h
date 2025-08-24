@@ -25,7 +25,7 @@ public:
 
 private:
 	void RecreateGridSlots();
-
+	TSharedRef<SWidget> CreateSettingsView(const TSharedRef<TStructOnScope<FMinesweeperGameSettings>>& InitialSettings);
 	void OnGameFinished(const EGameEndResult Result);
 	
 	TSharedPtr<SCheckBox> SettingsCheckbox;

@@ -11,24 +11,6 @@
 #include "Widgets/Layout/SUniformGridPanel.h"
 #include "Widgets/Input/SCheckBox.h"
 
-namespace MinesweeperWidgetUtils
-{
-	TSharedRef<SWidget> CreateSettingsView(const TSharedRef<TStructOnScope<FMinesweeperGameSettings>>& InitialSettings)
-	{
-		FDetailsViewArgs ViewArgs;
-		{
-			ViewArgs.bAllowSearch = false;
-			ViewArgs.bShowScrollBar = true;
-		}
-		FPropertyEditorModule& PropertyEditor = FModuleManager::Get().LoadModuleChecked<FPropertyEditorModule>(MinesweeperUtils::PropertyEditorModuleName);
-	
-		TSharedRef<IStructureDetailsView> StructureView = PropertyEditor.CreateStructureDetailView(ViewArgs, {}, InitialSettings, INVTEXT("Game Settings"));
-		TSharedPtr<SWidget> ViewAsWidget = StructureView->GetWidget();
-		check(ViewAsWidget.IsValid())
-		return ViewAsWidget.ToSharedRef();
-	}
-}
-
 void SMinesweeperGameWidget::Construct(const FArguments& InArgs)
 {
 	const FMinesweeperGameSettings& InitialSettings = InArgs._InitialSettings.IsSet() ? InArgs._InitialSettings.GetValue() : UMinesweeperSettings::GetDefaultSettings();
@@ -51,7 +33,7 @@ void SMinesweeperGameWidget::Construct(const FArguments& InArgs)
 		.AutoHeight()
 		.MaxHeight(150.f)
 		[
-			MinesweeperWidgetUtils::CreateSettingsView(Settings)
+			CreateSettingsView(Settings)
 		]
 		+SVerticalBox::Slot()
 		.AutoHeight()
@@ -111,6 +93,28 @@ void SMinesweeperGameWidget::Construct(const FArguments& InArgs)
 		]
 	];
 	RecreateGridSlots();
+}
+
+TSharedRef<SWidget> SMinesweeperGameWidget::CreateSettingsView(const TSharedRef<TStructOnScope<FMinesweeperGameSettings>>& InitialSettings)
+{
+	FDetailsViewArgs ViewArgs;
+	{
+		ViewArgs.bAllowSearch = false;
+		ViewArgs.bShowScrollBar = true;
+	}
+	FPropertyEditorModule& PropertyEditor = FModuleManager::Get().LoadModuleChecked<FPropertyEditorModule>(MinesweeperUtils::PropertyEditorModuleName);
+	
+	TSharedRef<IStructureDetailsView> StructureView = PropertyEditor.CreateStructureDetailView(ViewArgs, {}, InitialSettings, INVTEXT("Game Settings"));
+	StructureView->GetOnFinishedChangingPropertiesDelegate().AddSPLambda(this, [this](const FPropertyChangedEvent& Event)
+	{
+		if (SettingsCheckbox.IsValid() && SettingsCheckbox->IsChecked())
+		{
+			RecreateGridSlots();
+		}
+	});
+	TSharedPtr<SWidget> ViewAsWidget = StructureView->GetWidget();
+	check(ViewAsWidget.IsValid())
+	return ViewAsWidget.ToSharedRef();
 }
 
 void SMinesweeperGameWidget::RecreateGridSlots()
