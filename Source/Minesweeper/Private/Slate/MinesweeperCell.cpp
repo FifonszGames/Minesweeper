@@ -16,15 +16,12 @@ void SMinesweeperCell::Construct(const FArguments& InArgs)
 	ChildSlot
 	[
 		SAssignNew(MainButton, SButton)
-		.VAlign(VAlign_Fill)
-		.HAlign(HAlign_Fill)
 		.OnClicked(FOnClicked::CreateSPLambda(this, [this]()
 		{
 			OnCellClicked.ExecuteIfBound();
 			return FReply::Handled(); 
 		}))
 	];
-
 	InitFromCellData(*CellData.Get());
 }
 

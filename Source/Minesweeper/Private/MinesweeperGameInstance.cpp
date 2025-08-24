@@ -12,7 +12,7 @@ void FMinesweeperGameInstance::Init()
 {
 	bHasPlacedMines = false;
 	ValidCellsLeft.Reset();
-	const FMinesweeperGameSettings& Settings = *GameSettings->Get();
+	const FMinesweeperGameSettings& Settings = GetSettings();
 	Cells.Init(MakeShared<MinesweeperCellData>(), FUintPoint(Settings.Width, Settings.Height));
 }
 
@@ -61,6 +61,12 @@ void FMinesweeperGameInstance::CellSelected(const FUintPoint& SelectedCoords)
 		default:
 			break;
 	}
+}
+
+const FMinesweeperGameSettings& FMinesweeperGameInstance::GetSettings() const
+{
+	check(GameSettings.IsValid())
+	return *GameSettings->Get();
 }
 
 void FMinesweeperGameInstance::PlaceMines(const FUintPoint& SafeCell)

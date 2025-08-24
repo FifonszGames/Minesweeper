@@ -31,6 +31,7 @@ public:
 	void CellSelected(const FUintPoint& SelectedCoords);
 	
 	const TSharedArray2D<MinesweeperCellData>& GetCells() const { return Cells; }
+	const FMinesweeperGameSettings& GetSettings() const;
 	
 	FOnFinished OnFinished;
 private:

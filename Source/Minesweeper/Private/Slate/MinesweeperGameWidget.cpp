@@ -3,6 +3,7 @@
 
 #include "Slate/MinesweeperGameWidget.h"
 #include "IStructureDetailsView.h"
+#include "Minesweeper.h"
 #include "MinesweeperGameInstance.h"
 #include "PropertyEditorModule.h"
 #include "Slate/MinesweeperCell.h"
@@ -41,8 +42,6 @@ void SMinesweeperGameWidget::Construct(const FArguments& InArgs)
 	.SlotPadding(FMargin(2.0f))
 	.MinDesiredSlotHeight(MinSlotSize)
 	.MinDesiredSlotWidth(MinSlotSize);
-
-	RecreateGridSlots();
 	
 	ChildSlot
 	[
@@ -101,9 +100,17 @@ void SMinesweeperGameWidget::Construct(const FArguments& InArgs)
 		.VAlign(VAlign_Fill)
 		.Padding(FMargin(16.f))
 		[
-			LocalGrid
+			SAssignNew(RatioBox, SBox)
+			[
+				SNew(SBorder)
+				.Padding(FMargin(16.f))
+				[
+					LocalGrid
+				]
+			]
 		]
 	];
+	RecreateGridSlots();
 }
 
 void SMinesweeperGameWidget::RecreateGridSlots()
@@ -114,22 +121,30 @@ void SMinesweeperGameWidget::RecreateGridSlots()
 	}
 	Grid->ClearChildren();
 	
+	const FMinesweeperGameSettings& Settings = MinesweeperGame->GetSettings();
+	const float Ratio = static_cast<float>(Settings.Width) / Settings.Height;
+	RatioBox->SetMaxAspectRatio(Ratio);
+	RatioBox->SetMinAspectRatio(Ratio);
+	
 	MinesweeperGame->Init();
 	MinesweeperGame->GetCells().Foreach([this](const FUintPoint& Coords, const TSharedPtr<MinesweeperCellData>& Value)
 	{
 		Grid->AddSlot(Coords.X,Coords.Y)
-		.VAlign(VAlign_Fill)
-		.HAlign(HAlign_Fill)
 		[
-			SNew(SMinesweeperCell)
-			.CellData(Value.ToSharedRef())
-			.OnCellClicked(FSimpleDelegate::CreateSPLambda(this, [Coords, this]
-			{
-				if (MinesweeperGame.IsValid())
+			SNew(SBox)
+			.MaxAspectRatio(1.f)
+			.MinAspectRatio(1.f)
+			[
+				SNew(SMinesweeperCell)
+				.CellData(Value.ToSharedRef())
+				.OnCellClicked(FSimpleDelegate::CreateSPLambda(this, [Coords, this]
 				{
-					MinesweeperGame->CellSelected(Coords);
-				}
-			}))
+					if (MinesweeperGame.IsValid())
+					{
+						MinesweeperGame->CellSelected(Coords);
+					}
+				}))
+			]
 		];
 	});
 	Grid->SetEnabled(true);

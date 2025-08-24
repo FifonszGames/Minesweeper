@@ -30,5 +30,6 @@ private:
 	
 	TSharedPtr<SCheckBox> SettingsCheckbox;
 	TSharedPtr<SUniformGridPanel> Grid;
+	TSharedPtr<SBox> RatioBox;
 	TSharedPtr<FMinesweeperGameInstance> MinesweeperGame;
 };
